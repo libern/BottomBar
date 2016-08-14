@@ -103,6 +103,7 @@ public class BottomBar extends RelativeLayout implements View.OnClickListener, V
     private int mCurrentTabPosition;
     private boolean mIsShiftingMode;
     private boolean mIsTintBarItem = true;
+    private boolean mIsScaleBarItemTitle = true;
 
     private Object mFragmentManager;
     private int mFragmentContainer;
@@ -642,6 +643,19 @@ public class BottomBar extends RelativeLayout implements View.OnClickListener, V
         }
 
         mIsTintBarItem = false;
+    }
+
+    /**
+     * No scale on Bar Item Title
+     */
+    public void noScaleOnBarItemTitle() {
+        if (mItems != null && mItems.length > 0) {
+            throw new UnsupportedOperationException("This BottomBar " +
+                    "already has items! You must call ignoreNightMode() " +
+                    "before setting any items.");
+        }
+
+        mIsScaleBarItemTitle = false;
     }
 
     /**
@@ -1528,20 +1542,22 @@ public class BottomBar extends RelativeLayout implements View.OnClickListener, V
         }
 
         if (animate) {
-            ViewPropertyAnimatorCompat titleAnimator = ViewCompat.animate(title)
-                    .setDuration(ANIMATION_DURATION)
-                    .scaleX(1)
-                    .scaleY(1);
+            if (mIsScaleBarItemTitle){
+                ViewPropertyAnimatorCompat titleAnimator = ViewCompat.animate(title)
+                        .setDuration(ANIMATION_DURATION)
+                        .scaleX(1)
+                        .scaleY(1);
 
-            if (mIsShiftingMode) {
-                titleAnimator.alpha(1.0f);
+                if (mIsShiftingMode) {
+                    titleAnimator.alpha(1.0f);
+                }
+
+                titleAnimator.start();
+
+                // We only want to animate the icon to avoid moving the title
+                // Shifting or fixed the padding above icon is always 6dp
+                MiscUtils.resizePaddingTop(icon, icon.getPaddingTop(), mSixDp, ANIMATION_DURATION);
             }
-
-            titleAnimator.start();
-
-            // We only want to animate the icon to avoid moving the title
-            // Shifting or fixed the padding above icon is always 6dp
-            MiscUtils.resizePaddingTop(icon, icon.getPaddingTop(), mSixDp, ANIMATION_DURATION);
 
             if (mIsShiftingMode) {
                 ViewCompat.animate(icon)
@@ -1552,10 +1568,13 @@ public class BottomBar extends RelativeLayout implements View.OnClickListener, V
 
             handleBackgroundColorChange(tabPosition, tab);
         } else {
-            ViewCompat.setScaleX(title, 1);
-            ViewCompat.setScaleY(title, 1);
-            icon.setPadding(icon.getPaddingLeft(), mSixDp, icon.getPaddingRight(),
-                icon.getPaddingBottom());
+            if (mIsScaleBarItemTitle) {
+                ViewCompat.setScaleX(title, 1);
+                ViewCompat.setScaleY(title, 1);
+
+                icon.setPadding(icon.getPaddingLeft(), mSixDp, icon.getPaddingRight(),
+                        icon.getPaddingBottom());
+            }
 
             if (mIsShiftingMode) {
                 ViewCompat.setAlpha(icon, 1.0f);
@@ -1600,18 +1619,20 @@ public class BottomBar extends RelativeLayout implements View.OnClickListener, V
         int iconPaddingTop = mIsShiftingMode ? mSixteenDp : mEightDp;
 
         if (animate) {
-            ViewPropertyAnimatorCompat titleAnimator = ViewCompat.animate(title)
-                    .setDuration(ANIMATION_DURATION)
-                    .scaleX(scale)
-                    .scaleY(scale);
+            if (mIsScaleBarItemTitle) {
+                ViewPropertyAnimatorCompat titleAnimator = ViewCompat.animate(title)
+                        .setDuration(ANIMATION_DURATION)
+                        .scaleX(scale)
+                        .scaleY(scale);
 
-            if (mIsShiftingMode) {
-                titleAnimator.alpha(0);
+                if (mIsShiftingMode) {
+                    titleAnimator.alpha(0);
+                }
+
+                titleAnimator.start();
+
+                MiscUtils.resizePaddingTop(icon, icon.getPaddingTop(), iconPaddingTop, ANIMATION_DURATION);
             }
-
-            titleAnimator.start();
-
-            MiscUtils.resizePaddingTop(icon, icon.getPaddingTop(), iconPaddingTop, ANIMATION_DURATION);
 
             if (mIsShiftingMode) {
                 ViewCompat.animate(icon)
@@ -1620,10 +1641,12 @@ public class BottomBar extends RelativeLayout implements View.OnClickListener, V
                         .start();
             }
         } else {
-            ViewCompat.setScaleX(title, scale);
-            ViewCompat.setScaleY(title, scale);
-            icon.setPadding(icon.getPaddingLeft(), iconPaddingTop, icon.getPaddingRight(),
-                icon.getPaddingBottom());
+            if (mIsScaleBarItemTitle) {
+                ViewCompat.setScaleX(title, scale);
+                ViewCompat.setScaleY(title, scale);
+                icon.setPadding(icon.getPaddingLeft(), iconPaddingTop, icon.getPaddingRight(),
+                        icon.getPaddingBottom());
+            }
 
             if (mIsShiftingMode) {
                 ViewCompat.setAlpha(icon, mTabAlpha);

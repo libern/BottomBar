@@ -26,6 +26,7 @@ public class ThreeImageTabsActivity extends Activity {
 
         mBottomBar = BottomBar.attach(this, savedInstanceState);
         mBottomBar.noTintBarItem();
+        mBottomBar.noScaleOnBarItemTitle();
         mBottomBar.setItems(R.menu.bottombar_menu_three_image_items);
         mBottomBar.setOnMenuTabClickListener(new OnMenuTabClickListener() {
             @Override
